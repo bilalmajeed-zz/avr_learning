@@ -1,10 +1,23 @@
-#define FOSC 1843200 //clock speed
-#define _BAUD 9600
-#define _UBRR ((F_CPU)/(BAUD*16UL)-1)
+#include <avr/io.h>
+#include <util/delay.h>
+#include <stdlib.h>
+
+#define BAUD 9600
+#define BAUDRATE ((F_CPU)/(BAUD*16UL)-1)
 
 void main(void)
 {
-	uart_init(_UBRR);
+	unsigned char a;
+	char buffer[10];
+
+	uart_init(BAUDRATE);
+	while(1)
+	{
+		a = uart_receive();                 // save the received data in a variable
+        itoa(a,buffer,10);                  // convert numerals into string
+        _delay_ms(100);
+        printf("DID SHIT\n");
+	}
 }
 
 void uart_init(unsigned int ubrr)
@@ -14,7 +27,7 @@ void uart_init(unsigned int ubrr)
 	UBRR0L = (unsigned char) ubrr;
 
 	/* enable receiver and transmitter */
-	UCSR0B = (1<<RXEN0) | (1<<TxEN0);
+	UCSR0B = (1<<RXEN0) | (1<<TXEN0);
 
 	/* set frame format: 8data, no parity, 1stop
 	UPM00/UPM01 - parity bits
@@ -25,7 +38,7 @@ void uart_init(unsigned int ubrr)
 
 void uart_transmit (unsigned char data)
 {
-	while(!(UCSRA & (1<<UDRE))); //wait while register is free
+	while(!(UCSRA & (1<<UDRE0))); //wait while register is free
 	UDR = data; 				 //load data in the register
 }
 
